@@ -1,0 +1,312 @@
+// Prisma Schema - Celebrity Bio Platform
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Celebrity {
+  id                 Int       @id @default(autoincrement())
+  slug               String    @unique @db.VarChar(255)
+
+  // Basic info
+  firstName          String    @map("first_name") @db.VarChar(100)
+  lastName           String    @map("last_name") @db.VarChar(100)
+  fullName           String    @map("full_name") @db.VarChar(255)
+  nickname           String?   @db.VarChar(100)
+
+  // Birth info
+  birthDate          DateTime? @map("birth_date") @db.Date
+  birthPlace         String?   @map("birth_place") @db.VarChar(255)
+  country            String?   @db.VarChar(100)
+
+  // Career
+  profession         String?   @db.VarChar(255)
+  activeYearsStart   Int?      @map("active_years_start")
+  activeYearsEnd     Int?      @map("active_years_end")
+
+  // Media
+  profileImageUrl    String?   @map("profile_image_url")
+  coverImageUrl      String?   @map("cover_image_url")
+
+  // Meta
+  isFeatured         Boolean   @default(false) @map("is_featured")
+  isVerified         Boolean   @default(false) @map("is_verified")
+  visibility         String    @default("published") @db.VarChar(20)
+
+  // SEO
+  seoTitle           String?   @map("seo_title") @db.VarChar(255)
+  seoDescription     String?   @map("seo_description")
+  canonicalUrl       String?   @map("canonical_url")
+
+  // Stats (denormalized)
+  totalViews         BigInt    @default(0) @map("total_views")
+  totalSearches      BigInt    @default(0) @map("total_searches")
+  popularityScore    Decimal   @default(0) @map("popularity_score") @db.Decimal(10, 2)
+
+  // Timestamps
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
+
+  // Relations
+  translations       CelebrityTranslation[]
+  socialLinks        SocialLink[]
+  tags               CelebrityTag[]
+  newsItems          NewsCelebrity[]
+  popularityStats    PopularityStat[]
+  viewLogs           ViewLog[]
+  searchLogs         SearchLog[]
+
+  @@index([slug])
+  @@index([birthDate])
+  @@index([country])
+  @@index([profession])
+  @@index([popularityScore])
+  @@index([isFeatured])
+  @@index([visibility])
+  @@map("celebrities")
+}
+
+model CelebrityTranslation {
+  id              Int      @id @default(autoincrement())
+  celebrityId     Int      @map("celebrity_id")
+  languageCode    String   @map("language_code") @db.VarChar(5)
+
+  bioShort        String?  @map("bio_short")
+  bioLong         String?  @map("bio_long")
+  careerSummary   String?  @map("career_summary")
+  funFacts        Json?    @map("fun_facts")
+
+  metaTitle       String?  @map("meta_title") @db.VarChar(255)
+  metaDescription String?  @map("meta_description")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  celebrity       Celebrity @relation(fields: [celebrityId], references: [id], onDelete: Cascade)
+
+  @@unique([celebrityId, languageCode])
+  @@index([languageCode])
+  @@map("celebrity_translations")
+}
+
+model SocialLink {
+  id              Int      @id @default(autoincrement())
+  celebrityId     Int      @map("celebrity_id")
+
+  platform        String   @db.VarChar(50)
+  handle          String?  @db.VarChar(255)
+  url             String
+  followersCount  BigInt?  @map("followers_count")
+  isVerified      Boolean  @default(false) @map("is_verified")
+  sortOrder       Int      @default(0) @map("sort_order")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  celebrity       Celebrity @relation(fields: [celebrityId], references: [id], onDelete: Cascade)
+
+  @@index([celebrityId, platform])
+  @@map("social_links")
+}
+
+model Tag {
+  id              Int      @id @default(autoincrement())
+  slug            String   @unique @db.VarChar(255)
+
+  nameTr          String?  @map("name_tr") @db.VarChar(100)
+  nameEn          String?  @map("name_en") @db.VarChar(100)
+
+  category        String?  @db.VarChar(50)
+  description     String?
+  icon            String?  @db.VarChar(100)
+  color           String?  @db.VarChar(7)
+
+  celebrityCount  Int      @default(0) @map("celebrity_count")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  celebrities     CelebrityTag[]
+
+  @@index([category])
+  @@index([slug])
+  @@map("tags")
+}
+
+model CelebrityTag {
+  celebrityId     Int      @map("celebrity_id")
+  tagId           Int      @map("tag_id")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  celebrity       Celebrity @relation(fields: [celebrityId], references: [id], onDelete: Cascade)
+  tag             Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([celebrityId, tagId])
+  @@index([tagId, celebrityId])
+  @@map("celebrity_tags")
+}
+
+model NewsItem {
+  id                  Int       @id @default(autoincrement())
+  slug                String    @unique @db.VarChar(255)
+
+  primaryCelebrityId  Int?      @map("primary_celebrity_id")
+
+  featuredImageUrl    String?   @map("featured_image_url")
+  sourceName          String?   @map("source_name") @db.VarChar(255)
+  sourceUrl           String?   @map("source_url")
+
+  category            String?   @db.VarChar(50)
+  isFeatured          Boolean   @default(false) @map("is_featured")
+  visibility          String    @default("published") @db.VarChar(20)
+
+  viewCount           BigInt    @default(0) @map("view_count")
+
+  publishedAt         DateTime? @map("published_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
+
+  translations        NewsTranslation[]
+  celebrities         NewsCelebrity[]
+
+  @@index([publishedAt])
+  @@index([category])
+  @@index([visibility])
+  @@map("news_items")
+}
+
+model NewsCelebrity {
+  newsId          Int      @map("news_id")
+  celebrityId     Int      @map("celebrity_id")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  news            NewsItem  @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  celebrity       Celebrity @relation(fields: [celebrityId], references: [id], onDelete: Cascade)
+
+  @@id([newsId, celebrityId])
+  @@map("news_celebrities")
+}
+
+model NewsTranslation {
+  id              Int      @id @default(autoincrement())
+  newsId          Int      @map("news_id")
+  languageCode    String   @map("language_code") @db.VarChar(5)
+
+  title           String   @db.VarChar(255)
+  summary         String?
+  content         String?
+
+  metaTitle       String?  @map("meta_title") @db.VarChar(255)
+  metaDescription String?  @map("meta_description")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  news            NewsItem @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@unique([newsId, languageCode])
+  @@map("news_translations")
+}
+
+model PopularityStat {
+  id              Int      @id @default(autoincrement())
+  celebrityId     Int      @map("celebrity_id")
+
+  periodType      String   @map("period_type") @db.VarChar(20)
+  periodStart     DateTime @map("period_start") @db.Date
+  periodEnd       DateTime @map("period_end") @db.Date
+
+  viewCount       BigInt   @default(0) @map("view_count")
+  searchCount     BigInt   @default(0) @map("search_count")
+  socialMentionCount BigInt @default(0) @map("social_mention_count")
+
+  popularityScore Decimal  @default(0) @map("popularity_score") @db.Decimal(10, 2)
+  rankPosition    Int?     @map("rank_position")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  celebrity       Celebrity @relation(fields: [celebrityId], references: [id], onDelete: Cascade)
+
+  @@unique([celebrityId, periodType, periodStart])
+  @@index([periodType, periodStart, periodEnd])
+  @@index([periodType, popularityScore])
+  @@map("popularity_stats")
+}
+
+model SearchLog {
+  id                  BigInt    @id @default(autoincrement())
+
+  query               String
+  normalizedQuery     String?   @map("normalized_query")
+
+  resultsCount        Int?      @map("results_count")
+  matchedCelebrityId  Int?      @map("matched_celebrity_id")
+  clickedPosition     Int?      @map("clicked_position")
+
+  userIpHash          String?   @map("user_ip_hash") @db.VarChar(64)
+  userAgent           String?   @map("user_agent")
+  countryCode         String?   @map("country_code") @db.VarChar(2)
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  celebrity           Celebrity? @relation(fields: [matchedCelebrityId], references: [id], onDelete: SetNull)
+
+  @@index([query])
+  @@index([normalizedQuery])
+  @@index([createdAt])
+  @@index([matchedCelebrityId])
+  @@map("search_logs")
+}
+
+model ViewLog {
+  id              BigInt    @id @default(autoincrement())
+  celebrityId     Int       @map("celebrity_id")
+
+  pageType        String    @default("profile") @db.VarChar(50)
+  referrer        String?
+
+  userIpHash      String?   @map("user_ip_hash") @db.VarChar(64)
+  userAgent       String?   @map("user_agent")
+  countryCode     String?   @map("country_code") @db.VarChar(2)
+  sessionId       String?   @map("session_id") @db.VarChar(255)
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  celebrity       Celebrity @relation(fields: [celebrityId], references: [id], onDelete: Cascade)
+
+  @@index([celebrityId, createdAt])
+  @@index([createdAt])
+  @@index([sessionId])
+  @@map("view_logs")
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique @db.VarChar(255)
+  passwordHash    String    @map("password_hash")
+
+  fullName        String?   @map("full_name") @db.VarChar(255)
+  avatarUrl       String?   @map("avatar_url")
+
+  role            String    @default("editor") @db.VarChar(50)
+  isActive        Boolean   @default(true) @map("is_active")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+
+  lastLoginAt     DateTime? @map("last_login_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@map("users")
+}
