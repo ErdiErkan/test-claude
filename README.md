@@ -58,6 +58,74 @@ Celebrity Bio Platform, fenomenler ve ünlülerin biyografilerini barındıran k
 
 ---
 
+## ⚡ Hızlı Başlangıç
+
+### Otomatik Kurulum (Önerilen)
+
+**Linux/macOS:**
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+**Windows:**
+```powershell
+.\setup.ps1
+```
+
+Bu script otomatik olarak:
+- Docker container'larını başlatır (PostgreSQL, Redis, Meilisearch)
+- Dependencies'leri yükler
+- Veritabanını oluşturur
+- Örnek verileri ekler
+- Projeyi çalıştırmaya hazır hale getirir
+
+### Manuel Kurulum
+
+```bash
+# 1. Docker container'larını başlat
+docker-compose up -d
+
+# 2. Dependencies yükle
+npm install
+
+# 3. Prisma client oluştur
+npx prisma generate
+
+# 4. Veritabanı şemasını push et
+npx prisma db push
+
+# 5. Örnek verileri ekle
+npx prisma db seed
+
+# 6. Development server'ı başlat
+npm run dev
+```
+
+### 🎉 Çalıştırma
+
+```bash
+npm run dev
+```
+
+Tarayıcınızda `http://localhost:3000` adresini açın!
+
+### 👤 Admin Girişi
+
+- **Email:** admin@celebritybio.com
+- **Password:** admin123
+
+### 📦 Örnek Veriler
+
+Seed işlemi otomatik olarak ekler:
+- ✅ 2 ünlü (CZN Burak, Enes Batur)
+- ✅ 6 etiket (YouTuber, TikTok Star, Chef, vb.)
+- ✅ 5 sosyal medya linki
+- ✅ 1 haber
+- ✅ 1 admin kullanıcı
+
+---
+
 ## 📚 Dokümantasyon
 
 Detaylı dokümantasyon `docs/` klasöründe bulunmaktadır:
