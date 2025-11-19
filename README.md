@@ -118,11 +118,12 @@ Tarayıcınızda `http://localhost:3000` adresini açın!
 ### 📦 Örnek Veriler
 
 Seed işlemi otomatik olarak ekler:
-- ✅ 2 ünlü (CZN Burak, Enes Batur)
-- ✅ 6 etiket (YouTuber, TikTok Star, Chef, vb.)
-- ✅ 5 sosyal medya linki
-- ✅ 1 haber
+- ✅ 8 ünlü (CZN Burak, Enes Batur, Nusret Gökçe, Reynmen, Danla Bilic, Orkun Işıtmak, Murat Dalkılıç, Hadise)
+- ✅ 11 etiket (YouTuber, TikTok Star, Chef, Müzisyen, Rapçi, Influencer, Model, Oyuncu, vb.)
+- ✅ 17 sosyal medya linki
+- ✅ 5 haber
 - ✅ 1 admin kullanıcı
+- ✅ 8 popülerlik istatistiği
 
 ---
 

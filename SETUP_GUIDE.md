@@ -188,29 +188,33 @@ Admin panele erişim: `http://localhost:3000/admin`
 
 Seed işlemi (`npx prisma db seed`) şunları oluşturur:
 
-### Ünlüler (2)
-1. **CZN Burak** (Burak Özdemir)
-   - Chef, Entrepreneur
-   - Instagram: 54.2M followers
-   - TikTok: 32.1M followers
+### Ünlüler (8)
+1. **CZN Burak** (Burak Özdemir) - Chef, Entrepreneur
+2. **Enes Batur** - YouTuber, Content Creator
+3. **Nusret Gökçe** (Salt Bae) - Chef, Restaurateur
+4. **Reynmen** (Yusuf Aktaş) - Rapper, YouTuber
+5. **Danla Bilic** - Influencer, Entrepreneur
+6. **Orkun Işıtmak** - YouTuber, Comedian
+7. **Murat Dalkılıç** - Singer, Songwriter
+8. **Hadise** - Singer, TV Personality
 
-2. **Enes Batur**
-   - YouTuber, Content Creator
-   - YouTube: 16M subscribers
-   - Instagram: 8.5M followers
-
-### Etiketler (6)
+### Etiketler (11)
 - YouTuber
 - TikTok Star
 - Chef
 - Turkish
 - Entrepreneur
 - Gaming
+- Musician (Müzisyen)
+- Rapper (Rapçi)
+- Influencer
+- Model
+- Actor (Oyuncu)
 
 ### Diğer
-- 1 haber makalesi
-- 5 sosyal medya linki
-- 2 popülerlik istatistiği
+- 5 haber makalesi
+- 17 sosyal medya linki
+- 8 popülerlik istatistiği
 
 ---
 

@@ -123,9 +123,10 @@ Write-Host "   Email: admin@celebritybio.com"
 Write-Host "   Password: admin123"
 Write-Host ""
 Write-Host "📦 Sample Data:" -ForegroundColor Blue
-Write-Host "   - 2 celebrities (CZN Burak, Enes Batur)"
-Write-Host "   - 6 tags"
-Write-Host "   - 1 news item"
+Write-Host "   - 8 celebrities (CZN Burak, Enes Batur, Nusret, Reynmen, Danla Bilic, Orkun Işıtmak, Murat Dalkılıç, Hadise)"
+Write-Host "   - 11 tags"
+Write-Host "   - 5 news items"
+Write-Host "   - 17 social media links"
 Write-Host ""
 Write-Host "🚀 Start development server:" -ForegroundColor Blue
 Write-Host "   npm run dev"
