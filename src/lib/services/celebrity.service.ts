@@ -123,3 +123,82 @@ export async function getTrendingCelebrities(params: {
 
   return trending
 }
+
+export interface GetPopularCelebritiesParams {
+  locale: string
+  period?: 'daily' | 'weekly' | 'monthly' | 'all-time'
+  page?: number
+  limit?: number
+  sortBy?: 'views' | 'searches' | 'popularity'
+}
+
+export async function getPopularCelebrities({
+  locale,
+  period = 'weekly',
+  page = 1,
+  limit = 24,
+  sortBy = 'popularity',
+}: GetPopularCelebritiesParams) {
+  const skip = (page - 1) * limit
+
+  let orderBy: any = { popularityScore: 'desc' }
+  if (sortBy === 'views') {
+    orderBy = { totalViews: 'desc' }
+  } else if (sortBy === 'searches') {
+    orderBy = { totalSearches: 'desc' }
+  }
+
+  const [celebrities, total] = await Promise.all([
+    prisma.celebrity.findMany({
+      where: {
+        visibility: 'published',
+        deletedAt: null,
+      },
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        translations: {
+          where: { languageCode: locale },
+        },
+        socialLinks: {
+          orderBy: { sortOrder: 'asc' },
+        },
+        tags: {
+          include: { tag: true },
+          take: 5,
+        },
+      },
+    }),
+    prisma.celebrity.count({
+      where: {
+        visibility: 'published',
+        deletedAt: null,
+      },
+    }),
+  ])
+
+  return {
+    celebrities,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  }
+}
+
+export async function getCelebritiesByMonth(month: number, locale: string = 'en') {
+  const celebrities = await prisma.$queryRaw<any[]>`
+    SELECT c.*, ct.bio_short, ct.language_code
+    FROM celebrities c
+    LEFT JOIN celebrity_translations ct ON c.id = ct.celebrity_id AND ct.language_code = ${locale}
+    WHERE EXTRACT(MONTH FROM c.birth_date) = ${month}
+      AND c.visibility = 'published'
+      AND c.deleted_at IS NULL
+    ORDER BY EXTRACT(DAY FROM c.birth_date), c.popularity_score DESC
+  `
+
+  return celebrities
+}
